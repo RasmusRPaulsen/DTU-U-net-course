@@ -35,10 +35,10 @@ The course is to some degree a group based self-study course where the superviso
 7-grade scale based on written report of approximately 15 pages written by the student group.
 
 ## Schedule 2023:
-- Week 1: January 9. – 13.
-- Week 2: January 16. – 20.
+- **Week 1**: January 9. – 13.
+- **Week 2**: January 16. – 20.
 - Holidays: January 23. – 27.
-- Week 3: January 30. – February 3.
+- **Week 3**: January 30. – February 3.
 
 ## Preparations:
 - Have a Python / Anaconda environment up and running. 
@@ -46,12 +46,15 @@ The course is to some degree a group based self-study course where the superviso
 - Do the following exercise:
    - https://github.com/RasmusRPaulsen/DTUImageAnalysis/tree/main/exercises/ex1-IntroductionToImageAnalysis
 
+## Data:
+- [MM-WHS: Multi-Modality Whole Heart Segmentation](https://zmiclab.github.io/zxh/0/mmwhs/) . Rasmus has these data.
+- [TotalSegmentator dataset](https://zenodo.org/record/6802614#.Y6Qn23bMIR8)
 
 
 ### Week 1:
 - Monday : Week 1-2 from 02456schedule
 - Tuesday : Week 1-2 from 02456schedule
-- Wednesday: Visit to Rigshospitalet. 3D Slicer on abdominal data / heart data. Try TotalSegmentator.
+- Wednesday: Visit to Rigshospitalet. [3D Slicer](https://www.slicer.org/) on abdominal data / heart data. Try [TotalSegmentator](https://www.youtube.com/watch?v=osvMB5SKcVQ).
 - Thursday: Week 2-3 from 02456schedule
 - Friday: Week 2-3 from 02456schedule
 
