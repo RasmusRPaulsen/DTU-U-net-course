@@ -71,7 +71,6 @@ def read_label_and_show_a_slice():
     print(f"Heart sum {heart_sum} so is there a heart {is_there_a_heart}")
 
 
-
 def resample_image():
     full_name = 'C:/data/MM-WHS/ct_train_test/ct_train/ct_train_1001_image.nii.gz'
     out_name =  'C:/data/test/MM-WHS-1001-resampled.nii.gz'
@@ -118,15 +117,13 @@ def resample_image():
 def resample_image_and_label_image():
     full_name = 'C:/data/MM-WHS/ct_train_test/ct_train/ct_train_1001_image.nii.gz'
     out_name = 'C:/data/test/MM-WHS/MM-WHS-1001-resampled_intensity.nii.gz'
-    label_name = 'C:/data/MM-WHS/ct_train_test/ct_train/ct_train_1001_image.nii.gz'
+    label_name = 'C:/data/MM-WHS/ct_train_test/ct_train/ct_train_1001_label.nii.gz'
     label_out_name = 'C:/data/test/MM-WHS/MM-WHS-1001-label-resampled.nii.gz'
 
-    # out_name =  'C:/data/test/MM-WHS/'
     image = sitk.ReadImage(full_name)
-    # label_image = sitk.ReadImage(label_name, sitk.sitkUInt8)
-    label_image = sitk.Cast(sitk.ReadImage(label_name), sitk.sitkFloat32)
-    print(f"PixelID: {label_image.GetPixelID()}")
-    print(f"PixelID: {label_image.GetPixelIDTypeAsString ()}")
+    label_image = sitk.ReadImage(label_name, sitk.sitkUInt16)
+    # print(f"PixelID: {label_image.GetPixelID()}")
+    # print(f"PixelID: {label_image.GetPixelIDTypeAsString ()}")
 
     # how many voxel per slice side
     desired_num_voxels = 64
@@ -180,30 +177,85 @@ def resample_image_and_label_image():
 
     sitk.WriteImage(intensity_resampled_image, out_name)
 
+    # https://examples.itk.org/src/core/imagefunction/resamplesegmentedimage/documentation
+    # https://simpleitk.org/doxygen/latest/html/namespaceitk_1_1simple.html
     # Resample label image
-    # TODO: Something is not working here...so invalid output
     new_label_image = sitk.Image(new_volume_size, label_image.GetPixelIDValue())
     new_label_image.SetOrigin(image.GetOrigin())
     new_label_image.SetSpacing([new_spacing, new_spacing, new_spacing])
     new_label_image.SetDirection(image.GetDirection())
 
+    # interpolator = sitk.sitkLabelGaussian
     interpolator = sitk.sitkNearestNeighbor
     resampled_image = sitk.Resample(label_image, new_label_image, translation, interpolator)
-
-    # label_out_image = None
-    # n_classes = 2
-    # if n_classes == 2:  # (Background + Foreground)
-    #     label_out_image = (resampled_image > 0).astype(np.float32)
-    # else:
-    #     label_out_image = np.zeros(resampled_image.shape).astype(np.float32)
-    #     label_out_image[resampled_image == 500] = 1  # LV
-    #     label_out_image[resampled_image == 600] = 2  # RV
-    #     label_out_image[resampled_image == 420] = 3  # LA
-    #     label_out_image[resampled_image == 550] = 4  # RA
 
     sitk.WriteImage(resampled_image, label_out_name)
 
 
+def sample_slices_from_resampled_volume(mm_whs_id):
+    resample_name = f'C:/data/test/MM-WHS/MM-WHS-{mm_whs_id}-resampled_intensity.nii.gz'
+    label_name = f'C:/data/test/MM-WHS/MM-WHS-{mm_whs_id}-label-resampled.nii.gz'
+    out_name =  'C:/data/test/MM-WHS/'
+
+    image = sitk.ReadImage(resample_name)
+    labels = sitk.ReadImage(label_name)
+
+    # Convert to numpy array
+    img_np = sitk.GetArrayFromImage(image)
+    print(f"SITK image size: {image.GetSize()}")
+
+    # Convert numpy array from (z, y, x) to (x, y, z)
+    img_np = img_np.transpose(2, 1, 0)
+
+    labels_np = sitk.GetArrayFromImage(labels)
+    labels_np = labels_np.transpose(2, 1, 0)
+
+    n_slices = labels_np.shape[2]
+    print(f"n slices {n_slices}")
+
+    for i in range(n_slices):
+        slice_number = i
+        img_slice = img_np[:, :, slice_number]
+        lab_slice = labels_np[:, :, slice_number]
+
+        bin_slice = lab_slice > 0
+        has_heart = "no_heart"
+        if np.sum(bin_slice) > 0:
+            has_heart = "has_heart"
+
+        out_name_img_slice = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{i}-image-{has_heart}.npy"
+        out_name_img_label = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{i}-label-{has_heart}.npy"
+
+        np.save(out_name_img_slice, img_slice)
+        np.save(out_name_img_label, lab_slice)
+
+
+def write_all_slices():
+    mm_whs_id = "1001"
+    sample_slices_from_resampled_volume(mm_whs_id)
+
+
+# Check if we have saved slices correctly
+def debug_check_single_slice():
+    out_name =  'C:/data/test/MM-WHS/'
+    mm_whs_id = "1001"
+    has_heart = "has_heart"
+    i = 30
+
+    name_img_slice = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{i}-image-{has_heart}.npy"
+    name_img_label = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{i}-label-{has_heart}.npy"
+    one_slice = np.load(name_img_slice)
+    labels = np.load(name_img_label)
+
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True,
+                                   sharey=True)
+    ax1.imshow(one_slice, cmap="gray")
+    ax1.set_title('Rescaled image')
+    ax1.axis('off')
+    ax2.imshow(labels)
+    ax2.set_title('Corresponding labels')
+    ax2.axis('off')
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -211,4 +263,6 @@ if __name__ == '__main__':
     # read_file_and_print_info()
     # read_file_and_show_a_slice()
     # resample_image()
-    resample_image_and_label_image()
+    # resample_image_and_label_image()
+    write_all_slices()
+    debug_check_single_slice()
