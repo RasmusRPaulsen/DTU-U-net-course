@@ -72,3 +72,6 @@ The course is to some degree a group based self-study course where the superviso
 - Thursday: U-net implementation, training, validation and testing
 - Friday: U-net implementation, training, validation and testing
 
+## Links and other material
+
+- [3Blue1Brown on Neural networks](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
