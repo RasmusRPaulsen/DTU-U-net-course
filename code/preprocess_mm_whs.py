@@ -223,8 +223,8 @@ def sample_slices_from_resampled_volume(mm_whs_id):
         if np.sum(bin_slice) > 0:
             has_heart = "has_heart"
 
-        out_name_img_slice = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{i}-image-{has_heart}.npy"
-        out_name_img_label = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{i}-label-{has_heart}.npy"
+        out_name_img_slice = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{slice_number}-image-{has_heart}.npy"
+        out_name_img_label = f"{out_name}/MM-WHS-{mm_whs_id}-slice-{slice_number}-label-{has_heart}.npy"
 
         np.save(out_name_img_slice, img_slice)
         np.save(out_name_img_label, lab_slice)
